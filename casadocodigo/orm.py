@@ -1,11 +1,7 @@
-from enum import unique
-from operator import index
-from sqlalchemy import Column, ForeignKey, Integer, MetaData, String, Table
-from sqlalchemy import create_engine
+from sqlalchemy import Column, Integer, MetaData, String, Table
 from sqlalchemy.orm import registry
-from sqlalchemy.orm import relationship
-from sqlalchemy.orm.session import sessionmaker
-from . import model
+from .author.model import Author
+from .categories.model import Category
 
 mapper_registry = registry()
 metadata = MetaData()
@@ -19,14 +15,15 @@ author = Table(
     Column('email', String(50), unique=True,  index=True),
 )
 
+category = Table(
+    'category',
+    metadata,
+    Column('id', Integer, primary_key=True),
+    Column('name', String(50), unique=True,  index=True, ),
 
-mapper_registry.map_imperatively(model.Author, author)
-
-
-SQLALCHEMY_DATABASE_URL = "sqlite:///./sqlapp.db"
-
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
 )
 
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+mapper_registry.map_imperatively(Author, author)
+
+mapper_registry.map_imperatively(Category, category)

@@ -13,14 +13,4 @@ class BaseHTTPException(Exception, ABC):
 
     @abstractmethod
     def serialize(self) -> List[ErrorDescription]:
-        """docstring for serialize"""
-
-
-class EmailAlredyExist(BaseHTTPException):
-    status_code = 400
-
-    def __init__(self, *args: object) -> None:
-        super().__init__(*args)
-
-    def serialize(self) -> List[ErrorDescription]:
-        return [{"message": "email already exists", 'field': "email"}]
+        pass

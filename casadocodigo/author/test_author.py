@@ -6,8 +6,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 import pytest
 
-from .main import app, get_db
-from .orm import metadata
+from .router import  get_db
+from ..main import app
+from ..orm import metadata
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 

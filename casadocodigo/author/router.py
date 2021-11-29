@@ -1,8 +1,9 @@
 
 from fastapi import Depends, APIRouter
 from sqlalchemy.orm.session import Session
+
+from casadocodigo.ensure import ensure_this_field_has_no_duplicate
 from . import dtos, model
-from .errors import EmailAlredyExist
 from ..dependencies import get_db
 
 app = APIRouter(prefix="/author", tags=["author"])
@@ -14,9 +15,8 @@ def get_user_by_email(db: Session, email: str):
 
 @app.post("/", response_model=dtos.AuthorOut, status_code=201)
 def create_user(user: dtos.AuthorCreate, db: Session = Depends(get_db)):
-    user_exist = get_user_by_email(db, user.email)
-    if user_exist:
-        raise EmailAlredyExist()
+    ensure_this_field_has_no_duplicate(
+        get_user_by_email, "email", db, user.email)
 
     db_user = user.to_model()
     db.add(db_user)

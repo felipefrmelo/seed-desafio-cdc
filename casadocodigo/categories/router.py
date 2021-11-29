@@ -1,8 +1,9 @@
 
 from fastapi import Depends, APIRouter
 from sqlalchemy.orm.session import Session
+
+from casadocodigo.ensure import ensure_this_field_has_no_duplicate
 from . import dtos, model
-from .errors import CategoryAlredyExist
 from ..dependencies import get_db
 
 app = APIRouter(prefix="/category", tags=["category"])
@@ -14,9 +15,8 @@ def get_category_by_name(db: Session, name: str):
 
 @app.post("/", response_model=dtos.CategoryOut, status_code=201)
 def create_category(category: dtos.CategoryCreate, db: Session = Depends(get_db)):
-    category_exist = get_category_by_name(db, category.name)
-    if category_exist:
-        raise CategoryAlredyExist()
+    ensure_this_field_has_no_duplicate(
+        get_category_by_name, "category", db, category.name)
 
     db_category = category.to_model()
     db.add(db_category)

@@ -1,50 +1,13 @@
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm.session import Session
-import pytest
-
-from .router import  get_db
-from ..main import app
-from ..orm import metadata
-
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-TestingSessionLocal = sessionmaker(
-    autocommit=False, autoflush=False, bind=engine)
-
-metadata.create_all(bind=engine)
-
-
-def override_get_db():
-    try:
-        db: Session = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()  # type: ignore
-
-
-app.dependency_overrides[get_db] = override_get_db
-
-client = TestClient(app)
-
-
-@pytest.fixture
-def cleanup():
-    yield
-    engine.execute("DELETE FROM author")
 
 
 def makeUserData(**kwargs):
     return {"name": 'felipe', 'email': 'felipe@gmail.comm', 'description': "descrição do autor", **kwargs}
 
 
-def test_create_author(cleanup):
+def test_create_author(client: TestClient):
 
     user = makeUserData()
     response = client.post(
@@ -58,10 +21,10 @@ def test_create_author(cleanup):
     assert data == user
     assert Id is not None
     assert datetime.utcnow() - \
-        createdAt < timedelta(seconds=1)
+        createdAt < timedelta(seconds=0.1)
 
 
-def test_should_return_422_when_given_a_invalid_email():
+def test_should_return_422_when_given_a_invalid_email(client: TestClient):
 
     response = client.post(
         "/author/",
@@ -72,7 +35,7 @@ def test_should_return_422_when_given_a_invalid_email():
     }
 
 
-def test_should_return_a_body_with_errors():
+def test_should_return_a_body_with_errors(client: TestClient):
 
     response = client.post(
         "/author/",
@@ -85,7 +48,7 @@ def test_should_return_a_body_with_errors():
         assert error["message"] == 'field required'
 
 
-def test_the_description_cannot_exceed_400_characters():
+def test_the_description_cannot_exceed_400_characters(client: TestClient):
 
     responses = client.post('/author/',
                             json=makeUserData(description="des "*100 + "a"))
@@ -94,7 +57,7 @@ def test_the_description_cannot_exceed_400_characters():
         "field": 'description', 'message': "ensure this value has at most 400 characters"}
 
 
-def test_should_return_400_when_given_a_duplicated_email(cleanup):
+def test_should_return_400_when_given_a_duplicated_email(client: TestClient):
 
     user = makeUserData()
     client.post('/author/', json=user)

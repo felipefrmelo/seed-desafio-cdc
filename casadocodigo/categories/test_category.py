@@ -8,7 +8,7 @@ def test_should_return_400_when_given_a_duplicated_name(client: TestClient):
     response = client.post('/category/', json=category)
     assert response.status_code == 400, response.json()
     assert response.json() == {
-        'errors': [{'message': 'category already exists', 'field': 'category'}]
+        'errors': [{'message': 'name already exists', 'field': 'name'}]
     }
 
 

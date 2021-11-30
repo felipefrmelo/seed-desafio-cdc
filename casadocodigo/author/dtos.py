@@ -22,4 +22,5 @@ class AuthorCreate(BaseAuthor):
 
 class AuthorOut(BaseAuthor):
     id: int
-    createdAt: datetime = Field(default_factory=datetime.utcnow)
+    books: list
+    created_at: datetime

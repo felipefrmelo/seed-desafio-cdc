@@ -1,7 +1,6 @@
 from sqlalchemy.orm.session import Session
 
 from casadocodigo.author.dtos import AuthorCreate, BookCreate
-from casadocodigo.categories.handlers import get_category
 from ..domain.models import Author,  Category
 
 def create_author(session: Session, author_create: AuthorCreate):

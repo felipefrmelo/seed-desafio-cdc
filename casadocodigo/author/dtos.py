@@ -5,8 +5,7 @@ from pydantic.main import BaseModel
 from pydantic.networks import EmailStr
 
 from . import model
-from ..categories.dtos import CategoryOut
-
+from ..entrypoint.category import CategoryOut
 
 class BaseAuthor(BaseModel):
     name: str

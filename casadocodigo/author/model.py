@@ -1,8 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import List
-from ..categories.model import Category
-
+from ..domain.models import Category
 
 @dataclass
 class Book:

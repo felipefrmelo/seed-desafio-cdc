@@ -1,8 +1,8 @@
 from datetime import date, datetime
 
 from sqlalchemy.orm.session import Session
-from .author.model import Author, Book
-from .domain.models import Category
+from casadocodigo.author.model import Author, Book
+from casadocodigo.domain.models import Category
 
 def test_can_save_a_author_and_a_book(override_get_db):
     session: Session = override_get_db()

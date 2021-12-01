@@ -4,7 +4,7 @@ from sqlalchemy.orm import registry, relationship
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
 from .author.model import Author, Book
-from .categories.model import Category
+from .domain.models import Category
 
 mapper_registry = registry()
 metadata = MetaData()

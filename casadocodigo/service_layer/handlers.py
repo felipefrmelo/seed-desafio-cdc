@@ -1,8 +1,8 @@
 from sqlalchemy.orm.session import Session
 
 from casadocodigo.author.dtos import AuthorCreate, BookCreate
-from casadocodigo.author.model import Author
-from ..service_layer.handlers import get_category
+from casadocodigo.categories.handlers import get_category
+from ..domain.models import Author,  Category
 
 def create_author(session: Session, author_create: AuthorCreate):
     author = author_create.to_model()
@@ -24,3 +24,6 @@ def create_book(session: Session, author_id: int, book_create: BookCreate):
     author.add_book(book)
     session.commit()
     return book
+
+def get_category(session: Session, category_id: int) -> Category:
+    return session.query(Category).get(category_id)

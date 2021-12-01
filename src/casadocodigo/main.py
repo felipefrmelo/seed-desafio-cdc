@@ -7,15 +7,14 @@ from fastapi.responses import JSONResponse
 from casadocodigo.errors import BaseHTTPException
 from .orm import metadata
 from .database import engine
-# from .categories.router import app as CategoriesRouter
-from .author.router import app as AuthorRouter
 from .entrypoint.category import app as CategoryRouter
+from .entrypoint.author import app as EntrypointAuthorRouter
 app = FastAPI()
 
 metadata.create_all(engine)
 
 
-app.include_router(AuthorRouter)
+app.include_router(EntrypointAuthorRouter)
 app.include_router(CategoryRouter)
 
 

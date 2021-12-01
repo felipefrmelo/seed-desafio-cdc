@@ -3,8 +3,7 @@ from sqlalchemy import Column, Integer, MetaData, String, Table, Date, Text, Dat
 from sqlalchemy.orm import registry, relationship
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
-from .author.model import Author, Book
-from .domain.models import Category
+from .domain.models import Category, Author, Book
 
 mapper_registry = registry()
 metadata = MetaData()

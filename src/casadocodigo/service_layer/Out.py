@@ -7,8 +7,7 @@ from pydantic.networks import EmailStr
 class AuthorOut(BaseModel):
     id: int
     name: str
-    description: str = Field(
-        title="The description of the item", max_length=400)
+    description: str = Field(..., max_length=400)
     email: EmailStr
     books: list
     created_at: datetime

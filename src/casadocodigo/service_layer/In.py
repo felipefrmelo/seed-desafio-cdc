@@ -1,30 +1,23 @@
-from datetime import date, datetime
+from datetime import date
 from pydantic.fields import Field
 from pydantic.main import BaseModel
 from pydantic.networks import EmailStr
 from casadocodigo.domain.models import Author, Book, Category
 
 
-class BaseAuthor(BaseModel):
+class AuthorCreate(BaseModel):
     name: str
-    description: str = Field(
-        title="The description of the item", max_length=400)
+    description: str = Field(..., max_length=400)
     email: EmailStr
-
-
-class AuthorCreate(BaseAuthor):
 
     def to_model(self):
         return Author(name=self.name, description=self.description, email=self.email)
 
 
-
-
 class BookCreate(BaseModel):
     title: str
     resume: str
-    summary: str = Field(
-        title="The description of the item", max_length=500)
+    summary: str = Field(..., max_length=500)
     price: float = Field(..., ge=20)
     number_of_pages: int
     isbn: str
@@ -49,5 +42,3 @@ class CategoryCreate(BaseModel):
 
     def to_model(self):
         return Category(self.name)
-
-

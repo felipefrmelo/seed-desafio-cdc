@@ -6,9 +6,9 @@ from ..dependencies import get_db
 from ..domain.models import Category
 from casadocodigo.service_layer.In import CategoryCreate
 from casadocodigo.service_layer.Out import CategoryOut
+
+
 app = APIRouter(prefix="/category", tags=["category"])
-
-
 
 
 @app.post("/", response_model=CategoryOut, status_code=201)

@@ -5,10 +5,12 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from casadocodigo.errors import BaseHTTPException
+from casadocodigo.service_layer.errors import NotFound
 from .orm import metadata
 from .database import engine
 from .entrypoint.category import app as CategoryRouter
 from .entrypoint.author import app as EntrypointAuthorRouter
+from .entrypoint.books import app as EntrypointBookRouter
 app = FastAPI()
 
 metadata.create_all(engine)
@@ -16,6 +18,15 @@ metadata.create_all(engine)
 
 app.include_router(EntrypointAuthorRouter)
 app.include_router(CategoryRouter)
+app.include_router(EntrypointBookRouter)
+
+
+@app.exception_handler(NotFound)
+async def handle_unprocessable_entity(request: Request, exc: NotFound):
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"errors": exc.serialize()},
+    )
 
 
 @app.exception_handler(BaseHTTPException)

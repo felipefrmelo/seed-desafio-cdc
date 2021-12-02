@@ -2,10 +2,9 @@ from sqlalchemy.orm.session import Session
 
 from ..domain.models import Author,  Category
 from casadocodigo.service_layer.In import AuthorCreate, BookCreate
+from casadocodigo.service_layer import ensure
 
 from casadocodigo.domain.models import Author, Category
-
-
 
 
 def create_author(session: Session, author_create: AuthorCreate):
@@ -20,6 +19,9 @@ def get_author(session: Session, author_id: int) -> Author:
 
 
 def create_book(session: Session, author_id: int, book_create: BookCreate):
+    ensure.author_exists(session, author_id)
+    ensure.category_exists(session, book_create.category_id)
+
     author = get_author(session, author_id)
     category = get_category(session, book_create.category_id)
 

@@ -19,7 +19,7 @@ app = APIRouter(prefix="/author", tags=["author"])
 def create_author_endpoint(user: AuthorCreate, db: Session = Depends(get_db)):
 
     ensure_this_field_has_no_duplicate(
-        db, Author, "email", user.email)
+        db, Author, email=user.email)
 
     return create_author(db, user)
 
@@ -28,6 +28,6 @@ def create_author_endpoint(user: AuthorCreate, db: Session = Depends(get_db)):
 def create_book_endpoint(author_id: int, book: BookCreate, db: Session = Depends(get_db)):
 
     ensure_this_field_has_no_duplicate(
-        db, Book, "isbn", book.isbn)
+        db, Book, isbn=book.isbn, title=book.title)
 
     return create_book(db, author_id, book)

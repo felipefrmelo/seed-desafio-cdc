@@ -15,7 +15,7 @@ app = APIRouter(prefix="/category", tags=["category"])
 def create_category(category: CategoryCreate, db: Session = Depends(get_db)):
 
     ensure_this_field_has_no_duplicate(
-        db, Category, "name", category.name)
+        db, Category, name=category.name)
 
     db_category = category.to_model()
     db.add(db_category)

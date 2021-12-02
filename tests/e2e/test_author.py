@@ -1,29 +1,9 @@
 from datetime import date
 from fastapi.testclient import TestClient
+from api_test import post_author, post_category, post_book
 import pytest
 
-
-def post_author(client, **data):
-    data = {"name": 'test', 'email': 'test@test.comm',
-            'description': "descrição do autor", **data}
-    response = client.post("/author/", json=data)
-    return response.json(), response.status_code
-
-
-def post_category(client, **data):
-    data = {"name": 'programming', **data}
-    response = client.post("/category/", json=data)
-    return response.json(), response.status_code
-
-
-def post_book(client, author_id, category_id, **data):
-    data = {"title": 'test', 'resume': 'test',
-            'summary': "descrição do livro", 'price': 100.0,
-            'number_of_pages': 100, 'isbn': '123456789',
-            'publish_date': date.today().__str__(), 'category_id': category_id, **data}
-
-    response = client.post(f"/author/{author_id}/book", json=data)
-    return response.json(), response.status_code
+from tests.date_utils import make_publish_date
 
 
 @pytest.fixture
@@ -84,7 +64,7 @@ class TestBook:
 
     def test_should_create_a_book(self, client: TestClient, author_id, category_id):
 
-        data, status_code = post_book(client, author_id, category_id)
+        _, status_code = post_book(client, author_id, category_id)
 
         assert status_code == 201
 
@@ -104,7 +84,7 @@ class TestBook:
 
         assert status_code == 422
         assert data == {
-            'errors': [{'message': 'none is not an allowed value', 'field': field}]
+            'errors': [{'message': 'field required', 'field': field}]
         }
 
     def test_price_should_not_be_smaller_than_20(self, client: TestClient, author_id, category_id):
@@ -125,9 +105,54 @@ class TestBook:
             'errors': [{'message': 'ensure this value has at most 500 characters', 'field': 'summary'}]
         }
 
+    def test_number_of_pages_should_be_greater_than_100(self, client: TestClient, author_id, category_id):
+        data, status_code = post_book(
+            client, author_id, category_id, number_of_pages=99)
+
+        assert status_code == 422
+        assert data == {
+            'errors': [{'message': 'ensure this value is greater than or equal to 100', 'field': 'number_of_pages'}]
+        }
+
+    def test_title_should_not_be_duplicated(self, client: TestClient, author_id, category_id):
+        post_book(client, author_id, category_id, title="title")
+        data, status_code = post_book(
+            client, author_id, category_id, title="title", isbn='1234567890abc')
+
+        assert status_code == 400
+        assert data == {
+            'errors': [{'message': 'title already exists', 'field': 'title'}]
+        }
+
+    def test_publish_date_should_be_in_the_future(self, client: TestClient, author_id, category_id):
+
+        data, status_code = post_book(
+            client, author_id, category_id, publish_date=make_publish_date(days_in_future=0))
+        assert status_code == 422
+        assert data == {
+            'errors': [{'message': 'publish date must be in the future', 'field': 'publish_date'}]
+        }
+
+    def test_should_return_404_when_given_a_author_id_that_does_not_exist(self, client: TestClient, category_id):
+        data, status_code = post_book(client, 9999, category_id)
+
+        assert status_code == 404
+        assert data == {
+            'errors': [{'message': 'author not found'}]
+        }
+
+    def test_should_return_404_when_given_a_category_id_that_does_not_exist(self, client: TestClient, author_id):
+        data, status_code = post_book(client, author_id, category_id=9999)
+
+        assert status_code == 404
+        assert data == {
+            'errors': [{'message': 'category not found'}]
+        }
+
     def test_should_return_400_when_given_a_duplicated_isbn(self, client: TestClient, author_id, category_id):
         post_book(client, author_id, category_id)
-        data, status_code = post_book(client, author_id, category_id)
+        data, status_code = post_book(
+            client, author_id, category_id, title='other title')
 
         assert status_code == 400
         assert data == {

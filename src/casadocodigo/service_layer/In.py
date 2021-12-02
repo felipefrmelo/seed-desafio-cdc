@@ -1,8 +1,6 @@
 from datetime import date
-from pydantic.fields import Field
-from pydantic.main import BaseModel
-from pydantic.networks import EmailStr
 from casadocodigo.domain.models import Author, Book, Category
+from pydantic import BaseModel, validator, EmailStr, Field
 
 
 class AuthorCreate(BaseModel):
@@ -19,10 +17,16 @@ class BookCreate(BaseModel):
     resume: str
     summary: str = Field(..., max_length=500)
     price: float = Field(..., ge=20)
-    number_of_pages: int
+    number_of_pages: int = Field(..., ge=100)
     isbn: str
     publish_date: date
     category_id: int
+
+    @validator('publish_date')
+    def validate_publish_date(cls, v):
+        if date.today() >= v:
+            raise ValueError('publish date must be in the future')
+        return v
 
     def to_model(self, category: Category):
         return Book(

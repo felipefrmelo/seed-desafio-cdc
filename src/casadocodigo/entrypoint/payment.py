@@ -13,7 +13,7 @@ from ..dependencies import get_db
 app = APIRouter(prefix="/payment", tags=["payment"])
 
 
-def item_make_cart(db: Session, items: List[ItemCart]):
+def make_cart(db: Session, items: List[ItemCart]):
     books = db.query(Book).filter(
         Book.title.in_(item.title for item in items)).all()  # type: ignore
     if len(books) != len(items):
@@ -40,11 +40,12 @@ def create_payment(payment: PaymentCreate, db: Session = Depends(get_db)):
     if not country:
         raise CountryNotFound()
 
-    state = country.get_state(payment.state_name)
-    if not state:
-        raise ValidationException("state must be belong to country")
+    if payment.state_name:
+        state = country.get_state(payment.state_name)
+        if not state:
+            raise ValidationException("state must be belong to country")
 
-    cart = item_make_cart(db, payment.cart.items)
+    cart = make_cart(db, payment.cart.items)
 
     pay = payment.to_model(country, cart, valid_cupom(db))
 

@@ -94,7 +94,7 @@ payment = Table(
     Column('city', String(50), nullable=False),
     Column('phone', String(50), nullable=False),
     Column('zip_code', String(50), nullable=False),
-    Column('state_id', Integer, ForeignKey('state.id'), nullable=False),
+    Column('state_id', Integer, ForeignKey('state.id')),
     Column('cupom_id', Integer, ForeignKey('cupom.id')),
 )
 

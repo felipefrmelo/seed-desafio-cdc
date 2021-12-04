@@ -33,6 +33,13 @@ def test_should_create_a_payment(client, country_id, state_name, cart):
 
     assert response.status_code == 201
 
+def test_state_can_be_null(client,  cart):
+    response = post_country(client)
+   
+    response = post_pay(client, response.json()["id"], None, cart())
+
+    assert response.status_code == 201
+
 
 def test_document_should_be_cpf_or_cnpj(client, country_id, state_name, cart):
     response = post_pay(client, country_id, state_name, cart(),

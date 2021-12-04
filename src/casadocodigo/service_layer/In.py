@@ -150,7 +150,7 @@ class PaymentCreate(BaseModel):
     complement: str
     country_id: str
     city: str
-    state_name: str
+    state_name: Optional[str]
     phone: str
     zip_code: str
     cart: Cart

@@ -5,6 +5,7 @@ from sqlalchemy.orm.session import Session, sessionmaker
 from casadocodigo.main import app
 from casadocodigo.orm import metadata
 from casadocodigo.dependencies import get_db
+from tests.e2e.api_test import post_author, post_category
 
 
 @pytest.fixture
@@ -38,3 +39,15 @@ def client(override_get_db):
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as client:
         yield client
+
+
+@pytest.fixture
+def author_id(client):
+    data = post_author(client)
+    return data[0]['id']
+
+
+@pytest.fixture
+def category_id(client):
+    data = post_category(client)
+    return data[0]['id']

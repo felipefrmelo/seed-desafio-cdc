@@ -1,5 +1,4 @@
 from datetime import date, datetime
-from pydantic.fields import Field
 from pydantic.main import BaseModel
 from pydantic.networks import EmailStr
 
@@ -19,6 +18,15 @@ class CategoryOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class CountryOut(BaseModel):
+    id: int
+    name: str
+
+
+class StateOut(BaseModel):
+    name: str
 
 
 class BookOut(BaseModel):
@@ -60,3 +68,27 @@ class BookOutDetail(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class PaymentOut(BaseModel):
+    id: int
+    name: str
+    email: EmailStr
+    total: float
+
+
+class CupomOut(BaseModel):
+    code: str
+    percent_off: float
+
+    class Config:
+        orm_mode = True
+
+
+class PaymentOutDetail(BaseModel):
+    id: int
+    total:  float
+    items:  list
+    total_with_discount: float
+    discount: float
+    cupom: CupomOut

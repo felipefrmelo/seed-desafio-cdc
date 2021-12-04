@@ -1,6 +1,5 @@
 from sqlalchemy.orm.session import Session
 
-from ..domain.models import Author,  Category
 from casadocodigo.service_layer.In import AuthorCreate, BookCreate
 from casadocodigo.service_layer import ensure
 

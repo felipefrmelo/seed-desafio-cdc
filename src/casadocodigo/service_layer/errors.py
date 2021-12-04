@@ -33,3 +33,16 @@ class CategoryNotFound(NotFound):
 
 class BookNotFound(NotFound):
     entity = 'book'
+
+
+class CountryNotFound(NotFound):
+    entity = 'country'
+
+
+class ValidationException(BaseException):
+
+    def __init__(self, message) -> None:
+        self.message = message
+
+    def serialize(self) -> List[ErrorDescription]:
+        return [{'message': self.message}]

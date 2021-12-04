@@ -72,9 +72,12 @@ class BookOutDetail(BaseModel):
 
 class PaymentOut(BaseModel):
     id: int
+    total: float
+
+class CustomerOut(BaseModel):
+    id: int
     name: str
     email: EmailStr
-    total: float
 
 
 class CupomOut(BaseModel):

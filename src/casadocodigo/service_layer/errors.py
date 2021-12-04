@@ -38,6 +38,10 @@ class BookNotFound(NotFound):
 class CountryNotFound(NotFound):
     entity = 'country'
 
+class CustomerNotFound(NotFound):
+    entity = 'customer'
+
+
 
 class ValidationException(BaseException):
 

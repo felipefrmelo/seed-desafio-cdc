@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from tests.e2e.api_test import create_books, post_country, post_cupom, post_pay, post_state
+from tests.e2e.api_test import create_books, post_country, post_cupom, post_customer, post_pay, post_state
 import pytest
 from time import sleep
 
@@ -28,53 +28,21 @@ def state_name(client, country_id):
     return response.json()["name"]
 
 
-def test_should_create_a_payment(client, country_id, state_name, cart):
-    response = post_pay(client, country_id, state_name, cart())
+@pytest.fixture
+def customer_id(client, country_id, state_name):
+    data, status_code = post_customer(client, country_id, state_name)
+    assert status_code == 201
+    return data["id"]
+
+
+def test_should_create_a_payment(client, customer_id, cart):
+    response = post_pay(client, customer_id, cart())
 
     assert response.status_code == 201
 
-def test_state_can_be_null(client,  cart):
-    response = post_country(client)
-   
-    response = post_pay(client, response.json()["id"], None, cart())
 
-    assert response.status_code == 201
-
-
-def test_document_should_be_cpf_or_cnpj(client, country_id, state_name, cart):
-    response = post_pay(client, country_id, state_name, cart(),
-                        document='19218218921828193819831981')
-
-    assert response.status_code == 422
-    assert response.json() == {
-        'errors': [{'message': 'document must be a valid cpf or 14 cnpj', 'field': 'document'}]
-
-    }
-
-
-def test_state_should_be_belong_to_country(client, country_id, cart):
-
-    response = post_pay(client, country_id, 1212121, cart())
-
-    assert response.status_code == 400
-    assert response.json() == {
-        'errors': [{'message': 'state must be belong to country'}]
-
-    }
-
-
-def test_should_return_404_when_country_not_found(client, cart):
-    response = post_pay(client, 1212121, 'Test', cart())
-
-    assert response.status_code == 404
-    assert response.json() == {
-        'errors': [{'message': 'country not found'}]
-
-    }
-
-
-def test_should_return_400_when_cart_total_not_equal_to_payment_total(client, country_id, state_name, cart):
-    response = post_pay(client, country_id, state_name, cart(total=895746321))
+def test_should_return_400_when_cart_total_not_equal_to_payment_total(client, customer_id, cart):
+    response = post_pay(client, customer_id, cart(total=895746321))
 
     assert response.status_code == 400
     assert response.json() == {
@@ -83,8 +51,8 @@ def test_should_return_400_when_cart_total_not_equal_to_payment_total(client, co
     }
 
 
-def test_code_of_cupom_should_be_valid(client, country_id, state_name, cart):
-    response = post_pay(client, country_id, state_name,
+def test_code_of_cupom_should_be_valid(client, customer_id, cart):
+    response = post_pay(client, customer_id,
                         cart(), cupom_code='123456789')
 
     assert response.status_code == 400
@@ -94,7 +62,7 @@ def test_code_of_cupom_should_be_valid(client, country_id, state_name, cart):
     }
 
 
-def test_cupom_is_invalid_when_expires(client, country_id, state_name, cart):
+def test_cupom_is_invalid_when_expires(client, customer_id, cart):
     expires_at = datetime.utcnow() + timedelta(milliseconds=100)
 
     _, status_code = post_cupom(
@@ -102,7 +70,7 @@ def test_cupom_is_invalid_when_expires(client, country_id, state_name, cart):
     assert status_code == 201
     sleep(0.1)
 
-    response = post_pay(client, country_id, state_name,
+    response = post_pay(client, customer_id,
                         cart(), cupom_code='cupom123')
 
     assert response.status_code == 400
@@ -112,11 +80,11 @@ def test_cupom_is_invalid_when_expires(client, country_id, state_name, cart):
     }
 
 
-def test_get_detail_of_payment(client, country_id, state_name, cart):
+def test_get_detail_of_payment(client, customer_id, cart):
     post_cupom(client, code='cupom123', percent_off=10)
 
     cart = cart()
-    response = post_pay(client, country_id, state_name,
+    response = post_pay(client, customer_id,
                         cart, cupom_code='cupom123')
 
     assert response.status_code == 201

@@ -64,8 +64,16 @@ def post_cupom(client, **kwargs):
     return response.json(), response.status_code
 
 
-def post_pay(client, country_id, state_name, cart, **kwargs):
+def post_pay(client,  customer_id, cart, **kwargs):
     response = client.post('/payment/', json={
+        'customer_id':customer_id,
+        'cart': cart,
+        **kwargs
+    })
+    return response
+
+def post_customer(client, country_id, state_name, **kwargs):
+    response = client.post('/customer/', json={
         'name': 'Test',
         'email': 'test@test.com',
         'last_name': 'Test',
@@ -77,7 +85,8 @@ def post_pay(client, country_id, state_name, cart, **kwargs):
         'state_name': state_name,
         'phone': '123456789',
         'zip_code': '12345678',
-        'cart': cart,
         **kwargs
     })
-    return response
+
+
+    return response.json(), response.status_code

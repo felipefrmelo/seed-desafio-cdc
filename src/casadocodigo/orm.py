@@ -15,7 +15,7 @@ from sqlalchemy.orm import backref, registry, relationship
 from sqlalchemy.sql.schema import ForeignKey
 from sqlalchemy.sql.sqltypes import DateTime
 
-from .domain.models import Author, Book, Category, Country, Cupom, OrderItem, Payment, State
+from .domain.models import Author, Book, Category, Country, Cupom, Customer, OrderItem, Payment, State
 
 mapper_registry = registry()
 metadata = MetaData()
@@ -79,9 +79,8 @@ order_item = Table(
     Column('payment_id', Integer, ForeignKey('payment.id'), nullable=False),
 )
 
-
-payment = Table(
-    'payment',
+customer = Table(
+    'customer',
     metadata,
     Column('id', Integer, primary_key=True),
     Column('name', String(50), nullable=False),
@@ -95,6 +94,13 @@ payment = Table(
     Column('phone', String(50), nullable=False),
     Column('zip_code', String(50), nullable=False),
     Column('state_id', Integer, ForeignKey('state.id')),
+)
+
+payment = Table(
+    'payment',
+    metadata,
+    Column('id', Integer, primary_key=True),
+    Column('customer_id', Integer, ForeignKey('customer.id')),
     Column('cupom_id', Integer, ForeignKey('cupom.id')),
 )
 
@@ -128,9 +134,14 @@ mapper_registry.map_imperatively(OrderItem, order_item, properties={
     'book': relationship(Book, backref='order_item')
 })
 
-mapper_registry.map_imperatively(Payment, payment, properties={
+mapper_registry.map_imperatively(Customer, customer, properties={
     'country': relationship(Country),
     'state': relationship(State),
+})
+
+
+mapper_registry.map_imperatively(Payment, payment, properties={
     'cart': relationship(OrderItem,  backref='payment'),
-    'cupom': relationship(Cupom)
+    'cupom': relationship(Cupom),
+    'customer': relationship(Customer)
 })

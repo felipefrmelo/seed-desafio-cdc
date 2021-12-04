@@ -14,6 +14,7 @@ from .entrypoint.books import app as EntrypointBookRouter
 from .entrypoint.countries import app as EntrypointCountryRouter
 from .entrypoint.payment import app as EntrypointPaymentRouter
 from .entrypoint.cupom import app as EntrypointCupomRouter
+from .entrypoint.customer import app as EntrypointCustomerRouter
 
 app = FastAPI()
 
@@ -26,6 +27,7 @@ app.include_router(EntrypointBookRouter)
 app.include_router(EntrypointCountryRouter)
 app.include_router(EntrypointPaymentRouter)
 app.include_router(EntrypointCupomRouter)
+app.include_router(EntrypointCustomerRouter)
 
 
 @app.exception_handler(NotFound)

@@ -1,6 +1,6 @@
 from datetime import date, datetime
 from typing import Callable, List, Optional
-from casadocodigo.domain.models import Author, Book, Category, Country, Cupom, OrderItem, Payment, State
+from casadocodigo.domain.models import Author, Book, Category, Country, Cupom, Customer, OrderItem, Payment, State
 from pydantic import BaseModel, validator, EmailStr, Field
 
 
@@ -142,41 +142,16 @@ class Cart(BaseModel):
 
 
 class PaymentCreate(BaseModel):
-    name: str
-    email: EmailStr
-    last_name: str
-    document: str
-    adrress: str
-    complement: str
-    country_id: str
-    city: str
-    state_name: Optional[str]
-    phone: str
-    zip_code: str
+    customer_id: int
     cart: Cart
     cupom_code: Optional[str]
 
-    @ validator('document')
-    def validate_document(cls, v):
-        if 14 != len(v) != 11:
-            raise ValueError('document must be a valid cpf or 14 cnpj')
-        return v
+ 
 
-    def to_model(self, country: Country, cart: List[OrderItem], valid_cupom: Callable[[str], Cupom]):
-        state = country.get_state(self.state_name)
+    def to_model(self, customer: Customer, cart: List[OrderItem], valid_cupom: Callable[[str], Cupom]):
         cupom = valid_cupom(self.cupom_code) if self.cupom_code else None
         return Payment(
-            name=self.name,
-            email=self.email,
-            last_name=self.last_name,
-            document=self.document,
-            adrress=self.adrress,
-            complement=self.complement,
-            country=country,
-            city=self.city,
-            state=state,
-            phone=self.phone,
-            zip_code=self.zip_code,
+            customer=customer,
             cart=cart,
             cupom=cupom
         )
@@ -184,17 +159,7 @@ class PaymentCreate(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "name": "J.K. Rowling",
-                "email": "example@example.com",
-                "last_name": "J.K. Rowling",
-                "document": "12345678901",
-                "adrress": "Rua do exemplo",
-                "complement": "Apto 101",
-                "country_id": "1",
-                "city": "São Paulo",
-                "state_name": "SP",
-                "phone": "11 99999-9999",
-                "zip_code": "01001000",
+                "customer_id": "1",
                 "cart": {
                     "total": 20.0,
                     "items": [
@@ -232,4 +197,57 @@ class CupomCreate(BaseModel):
                 "code": "123456789",
                 "percent_off": 10.0,
                 "expires_at": "2020-01-01"}
+        }
+
+
+class CustomerCreate(BaseModel):
+    name: str
+    email: EmailStr
+    last_name: str
+    document: str
+    adrress: str
+    complement: str
+    country_id: str
+    city: str
+    state_name: Optional[str]
+    phone: str
+    zip_code: str
+
+    @ validator('document')
+    def validate_document(cls, v):
+        if 14 != len(v) != 11:
+            raise ValueError('document must be a valid cpf or 14 cnpj')
+        return v
+
+    def to_model(self, country: Country):
+        state = country.get_state(self.state_name)
+        return Customer(
+            name=self.name,
+            email=self.email,
+            last_name=self.last_name,
+            document=self.document,
+            adrress=self.adrress,
+            complement=self.complement,
+            country=country,
+            city=self.city,
+            state=state,
+            phone=self.phone,
+            zip_code=self.zip_code,
+        )
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "name": "J.K. Rowling",
+                "email": "example@example.com",
+                "last_name": "J.K. Rowling",
+                "document": "12345678901",
+                "adrress": "Rua do exemplo",
+                "complement": "Apto 101",
+                "country_id": "1",
+                "city": "São Paulo",
+                "state_name": "SP",
+                "phone": "11 99999-9999",
+                "zip_code": "01001000"
+             }
         }

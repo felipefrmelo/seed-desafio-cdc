@@ -1,11 +1,11 @@
 from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm.session import Session
-from casadocodigo.domain.models import Country, Book, Cupom, OrderItem, Payment
+from casadocodigo.domain.models import Country, Book, Cupom, Customer, OrderItem, Payment
 
 from casadocodigo.service_layer.In import ItemCart, PaymentCreate
 from casadocodigo.service_layer.Out import PaymentOut, PaymentOutDetail
-from casadocodigo.service_layer.errors import CountryNotFound, ValidationException
+from casadocodigo.service_layer.errors import CountryNotFound, CustomerNotFound, ValidationException
 
 from ..dependencies import get_db
 
@@ -34,20 +34,15 @@ def valid_cupom(db: Session):
 
 @app.post("/", response_model=PaymentOut,  status_code=201)
 def create_payment(payment: PaymentCreate, db: Session = Depends(get_db)):
-    country: Country = db.query(Country).filter_by(
-        id=payment.country_id).first()
+    customer: Customer = db.query(Customer).filter_by(
+        id=payment.customer_id).first()
+    if not customer:
+        raise CustomerNotFound()
 
-    if not country:
-        raise CountryNotFound()
-
-    if payment.state_name:
-        state = country.get_state(payment.state_name)
-        if not state:
-            raise ValidationException("state must be belong to country")
 
     cart = make_cart(db, payment.cart.items)
 
-    pay = payment.to_model(country, cart, valid_cupom(db))
+    pay = payment.to_model(customer, cart, valid_cupom(db))
 
     if pay.total != payment.cart.total:
         raise ValidationException("cart total is invalid")
@@ -58,8 +53,7 @@ def create_payment(payment: PaymentCreate, db: Session = Depends(get_db)):
     paymentOut = PaymentOut(
         id=pay.id,
         total=pay.total,
-        email=pay.email,
-        name=pay.name)
+        )
     return paymentOut
 
 

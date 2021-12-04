@@ -74,9 +74,8 @@ class Cupom:
     def is_valid(self):
         return self.expires_at > datetime.utcnow()
 
-
 @dataclass
-class Payment:
+class Customer:
     id: int = field(init=False)
     name: str
     email: str
@@ -88,8 +87,15 @@ class Payment:
     city: str
     phone: str
     zip_code: str
-    cart: List[OrderItem] = field(default_factory=list)
     state: Optional[State] = field(default=None)
+
+  
+
+@dataclass
+class Payment:
+    id: int = field(init=False)
+    customer: Customer
+    cart: List[OrderItem] = field(default_factory=list)
     cupom: Optional[Cupom] = field(default=None)
 
     @property
@@ -107,3 +113,5 @@ class Payment:
         if self.cupom is None:
             return 0
         return self.total - self.total_with_discount
+
+
